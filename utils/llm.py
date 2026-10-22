@@ -1,14 +1,21 @@
 # utils/llm.py
 # ============================================================
-# AI Blog Writer — LLM Client via OpenRouter
-# OpenRouter is OpenAI-compatible, so we use langchain-openai.
-# It routes to 100+ models (including FREE ones).
+# AI Blog Writer: LLM client factory
+#
+# MODEL_NAME selects the provider:
+#   ollama/<model>       local Ollama server        (no key)
+#   openrouter/<model>   OpenRouter, OpenAI-compatible API (OPENROUTER_API_KEY)
+#   <anything else>      Google Gemini model name   (GOOGLE_API_KEY)
+#
+# Backward compatibility: a bare "vendor/model" name (for example
+# "meta-llama/llama-3.1-8b-instruct:free") is sent to OpenRouter when only
+# OPENROUTER_API_KEY is set. Prefer the explicit "openrouter/" prefix.
 # ============================================================
 
 import os
+from typing import Tuple
+
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_ollama import ChatOllama
 
 load_dotenv()
 
@@ -18,34 +25,77 @@ if os.getenv("LANGSMITH_API_KEY"):
     os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
     os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGSMITH_PROJECT", "ai-blog-writer")
 
+DEFAULT_MODEL = "ollama/qwen2.5:7b"
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+
+class LLMConfigError(ValueError):
+    """Raised when MODEL_NAME or the matching API key is missing or invalid."""
+
+
+def _get_key(name: str) -> str:
+    """Return an API key from the environment, or '' if unset or still the .env.example placeholder."""
+    value = os.getenv(name, "").strip()
+    if not value or (value.startswith("your_") and value.endswith("_here")):
+        return ""
+    return value
+
+
+def resolve_provider(model_name: str) -> Tuple[str, str]:
+    """Map MODEL_NAME to (provider, model) where provider is 'ollama', 'openrouter' or 'gemini'."""
+    name = (model_name or "").strip()
+    if not name:
+        raise LLMConfigError("MODEL_NAME is empty. Example: MODEL_NAME=ollama/qwen2.5:7b")
+
+    for prefix, provider in (("ollama/", "ollama"), ("openrouter/", "openrouter")):
+        if name.startswith(prefix):
+            model = name[len(prefix):]
+            if not model:
+                raise LLMConfigError(f"MODEL_NAME '{name}' has no model after '{prefix}'")
+            return provider, model
+
+    # Legacy form: bare "vendor/model" with only an OpenRouter key available
+    if "/" in name and not _get_key("GOOGLE_API_KEY") and _get_key("OPENROUTER_API_KEY"):
+        return "openrouter", name
+
+    return "gemini", name
+
 
 def get_llm(temperature: float = 0.7):
-    """
-    Returns an LLM client based on MODEL_NAME.
-    Supports Google Gemini, OpenRouter, and local Ollama.
-    """
-    model = os.getenv("MODEL_NAME", "gemini-1.5-flash")
+    """Return a chat model for the provider selected by MODEL_NAME."""
+    provider, model = resolve_provider(os.getenv("MODEL_NAME", DEFAULT_MODEL))
 
-    # Support local Ollama models (e.g., MODEL_NAME=ollama/llama3)
-    if model.startswith("ollama/"):
-        ollama_model = model.replace("ollama/", "")
-        return ChatOllama(
-            model=ollama_model,
+    if provider == "ollama":
+        from langchain_ollama import ChatOllama
+        return ChatOllama(model=model, temperature=temperature)
+
+    if provider == "openrouter":
+        key = _get_key("OPENROUTER_API_KEY")
+        if not key:
+            raise LLMConfigError(
+                f"MODEL_NAME selects OpenRouter ('{model}') but OPENROUTER_API_KEY is not set."
+            )
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(
+            model=model,
+            api_key=key,
+            base_url=OPENROUTER_BASE_URL,
             temperature=temperature,
+            max_tokens=4096,
         )
 
-    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("OPENROUTER_API_KEY")
-
-    if not api_key or api_key == "your_gemini_api_key_here":
-        raise ValueError(
-            "❌ API KEY not set!\n"
-            "   To use local Ollama: set MODEL_NAME=ollama/your-model (e.g., ollama/qwen2.5:7b)\n"
-            "   To use Cloud: set GOOGLE_API_KEY or OPENROUTER_API_KEY"
+    key = _get_key("GOOGLE_API_KEY")
+    if not key:
+        raise LLMConfigError(
+            f"MODEL_NAME '{model}' is treated as a Gemini model but GOOGLE_API_KEY is not set.\n"
+            "  Local Ollama:  MODEL_NAME=ollama/qwen2.5:7b\n"
+            "  OpenRouter:    MODEL_NAME=openrouter/<model>  with OPENROUTER_API_KEY\n"
+            "  Gemini:        MODEL_NAME=<gemini model name>  with GOOGLE_API_KEY"
         )
-
+    from langchain_google_genai import ChatGoogleGenerativeAI
     return ChatGoogleGenerativeAI(
         model=model,
-        google_api_key=api_key,
+        google_api_key=key,
         temperature=temperature,
         max_tokens=4096,
     )

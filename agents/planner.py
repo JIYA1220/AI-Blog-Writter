@@ -6,9 +6,9 @@
 # workers don't improvise, they execute a structured spec.
 # ============================================================
 
-import json
 import os
 from utils.llm import get_llm
+from utils.json_utils import parse_llm_json
 from utils.logger import log_stage, log_info, log_success
 from schemas.models import BlogPlan, SectionPlan, AIBlogWriterState
 
@@ -89,20 +89,7 @@ async def planner_node(state: AIBlogWriterState) -> dict:
 
     try:
         response = await llm.ainvoke(prompt)
-        raw = response.content.strip()
-
-        # Clean markdown fences
-        if raw.startswith("```"):
-            lines = raw.splitlines()
-            if lines[0].startswith("```"):
-                raw = "\n".join(lines[1:-1])
-        raw = raw.strip()
-
-        # Handle case where model might put 'json' at the start
-        if raw.startswith("json"):
-            raw = raw[4:].strip()
-
-        data = json.loads(raw)
+        data = parse_llm_json(response.content)
 
         # Build validated BlogPlan
         sections = []

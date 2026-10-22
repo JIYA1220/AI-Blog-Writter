@@ -1,14 +1,18 @@
 # agents/evaluator.py
 # ============================================================
-# AI Blog Writer — Evaluator Node (LLM-as-Judge)
-# Critiques the final blog based on tone, audience, and content.
-# Provides a score and suggestions for improvement.
+# AI Blog Writer: Evaluator Node (LLM-as-Judge)
+# Pointwise judge: scores the final blog 1-10 (pass if >= 7).
+#
+# Known limitation: only the first EVAL_MAX_CHARS characters of the blog are
+# shown to the judge, so text after that point cannot affect the score.
 # ============================================================
 
-import json
 from utils.llm import get_llm
-from utils.logger import log_stage, log_info, log_success
+from utils.json_utils import parse_llm_json
+from utils.logger import log_stage, log_success
 from schemas.models import BlogEvaluation, AIBlogWriterState
+
+EVAL_MAX_CHARS = 4000
 
 EVALUATOR_PROMPT = """You are a senior editor. Evaluate the following blog post.
 
@@ -34,9 +38,28 @@ Respond ONLY with valid JSON:
 }}
 """
 
+
+def build_evaluator_prompt(topic: str, audience: str, tone: str, content: str,
+                           max_chars: int = EVAL_MAX_CHARS) -> str:
+    """Fill the judge prompt. Content is cut to max_chars (None means no cut)."""
+    shown = content if max_chars is None else content[:max_chars]
+    return EVALUATOR_PROMPT.format(topic=topic, audience=audience, tone=tone, content=shown)
+
+
+def parse_evaluation(raw: str) -> BlogEvaluation:
+    """Parse a judge reply into a BlogEvaluation. Raises on invalid JSON or schema."""
+    data = parse_llm_json(raw)
+    return BlogEvaluation(
+        score=data.get("score", 0),
+        reasoning=data.get("reasoning", "No reasoning provided"),
+        suggestions=data.get("suggestions", []),
+        is_pass=data.get("is_pass", False),
+    )
+
+
 async def evaluator_node(state: AIBlogWriterState) -> dict:
     """
-    Evaluator Node — LLM-as-judge.
+    Evaluator Node (LLM-as-judge).
     Critiques the final blog and provides a score.
     """
     final_blog = state.get("final_blog")
@@ -46,34 +69,16 @@ async def evaluator_node(state: AIBlogWriterState) -> dict:
     log_stage("EVALUATOR", "Evaluating final blog quality...")
 
     llm = get_llm(temperature=0.1)
-    prompt = EVALUATOR_PROMPT.format(
+    prompt = build_evaluator_prompt(
         topic=state["topic"],
         audience=state.get("target_audience", "general readers"),
         tone=state.get("tone", "informative"),
-        content=final_blog.full_content[:4000]  # Cap context for evaluation
+        content=final_blog.full_content,
     )
 
     try:
         response = await llm.ainvoke(prompt)
-        raw = response.content.strip()
-
-        # Clean markdown fences
-        if raw.startswith("```"):
-            lines = raw.splitlines()
-            if lines[0].startswith("```"):
-                raw = "\n".join(lines[1:-1])
-        raw = raw.strip()
-        if raw.startswith("json"):
-            raw = raw[4:].strip()
-
-        data = json.loads(raw)
-        
-        evaluation = BlogEvaluation(
-            score=data.get("score", 0),
-            reasoning=data.get("reasoning", "No reasoning provided"),
-            suggestions=data.get("suggestions", []),
-            is_pass=data.get("is_pass", False)
-        )
+        evaluation = parse_evaluation(response.content)
 
         if evaluation.is_pass:
             log_success(f"Evaluation PASSED (Score: {evaluation.score}/10)")
