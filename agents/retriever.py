@@ -97,7 +97,7 @@ async def retriever_node(state: AIBlogWriterState) -> dict:
         result = RetrievalResult(
             query=topic,
             snippets=clean_snippets,
-            sources=list(set(sources))[:6],
+            sources=list(dict.fromkeys(sources))[:6],
             is_grounded=True
         )
         return {"retrieval_results": result, "errors": []}

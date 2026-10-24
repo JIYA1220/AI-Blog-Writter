@@ -1,14 +1,33 @@
 # agents/evaluator.py
 # ============================================================
-# AI Blog Writer — Evaluator Node (LLM-as-Judge)
-# Critiques the final blog based on tone, audience, and content.
-# Provides a score and suggestions for improvement.
+# AI Blog Writer: Evaluator Node (LLM-as-Judge)
+# Pointwise judge: scores the final blog 1-10 (pass if >= 7).
+#
+# The judge reads the whole post up to EVALUATOR_MAX_CHARS characters
+# (default 20000, enough for posts of about 2,500 words). If a post is longer
+# than the cap, it is cut from the end and a warning is logged, never silently.
+# Lower the cap for a model whose context window cannot hold a full post.
+#
+# History: the first version cut every post to 4000 characters. The judge audit
+# (evaluation/) measured that this changed the pass/fail verdict for most long
+# posts, which is why the default was raised. LEGACY_EVAL_MAX_CHARS keeps the
+# old value so the audit can still reproduce the "before" condition.
 # ============================================================
 
-import json
+import logging
+import os
+
 from utils.llm import get_llm
-from utils.logger import log_stage, log_info, log_success
+from utils.json_utils import parse_llm_json
+from utils.logger import log_stage, log_success, log_warning
 from schemas.models import BlogEvaluation, AIBlogWriterState
+
+logger = logging.getLogger("ai_blog_writer.evaluator")
+
+DEFAULT_EVALUATOR_MAX_CHARS = 20000
+LEGACY_EVAL_MAX_CHARS = 4000        # the old hard-coded cap; used by evaluation/ for the "before" view
+
+_USE_CONFIG = object()
 
 EVALUATOR_PROMPT = """You are a senior editor. Evaluate the following blog post.
 
@@ -34,9 +53,55 @@ Respond ONLY with valid JSON:
 }}
 """
 
+
+def evaluator_max_chars() -> int:
+    """Character cap for the text shown to the judge, from EVALUATOR_MAX_CHARS (read at call time)."""
+    raw = os.getenv("EVALUATOR_MAX_CHARS", "").strip()
+    if not raw:
+        return DEFAULT_EVALUATOR_MAX_CHARS
+    try:
+        value = int(raw)
+    except ValueError:
+        value = 0
+    if value <= 0:
+        logger.warning("EVALUATOR_MAX_CHARS=%r is not a positive integer; using the default %d",
+                       raw, DEFAULT_EVALUATOR_MAX_CHARS)
+        return DEFAULT_EVALUATOR_MAX_CHARS
+    return value
+
+
+def build_evaluator_prompt(topic: str, audience: str, tone: str, content: str,
+                           max_chars=_USE_CONFIG, warn: bool = True) -> str:
+    """
+    Fill the judge prompt. By default the content is cut to EVALUATOR_MAX_CHARS and a warning is logged
+    when that removes text. Pass max_chars=None to show everything, or an int to set the cap explicitly.
+    """
+    cap = evaluator_max_chars() if max_chars is _USE_CONFIG else max_chars
+    shown = content
+    if cap is not None and len(content) > cap:
+        shown = content[:cap]
+        if warn:
+            message = (f"Post is {len(content)} characters, over the evaluator cap of {cap} "
+                       f"(EVALUATOR_MAX_CHARS); the last {len(content) - cap} characters are not shown to the judge.")
+            logger.warning(message)
+            log_warning(message)
+    return EVALUATOR_PROMPT.format(topic=topic, audience=audience, tone=tone, content=shown)
+
+
+def parse_evaluation(raw: str) -> BlogEvaluation:
+    """Parse a judge reply into a BlogEvaluation. Raises on invalid JSON or schema."""
+    data = parse_llm_json(raw)
+    return BlogEvaluation(
+        score=data.get("score", 0),
+        reasoning=data.get("reasoning", "No reasoning provided"),
+        suggestions=data.get("suggestions", []),
+        is_pass=data.get("is_pass", False),
+    )
+
+
 async def evaluator_node(state: AIBlogWriterState) -> dict:
     """
-    Evaluator Node — LLM-as-judge.
+    Evaluator Node (LLM-as-judge).
     Critiques the final blog and provides a score.
     """
     final_blog = state.get("final_blog")
@@ -46,34 +111,16 @@ async def evaluator_node(state: AIBlogWriterState) -> dict:
     log_stage("EVALUATOR", "Evaluating final blog quality...")
 
     llm = get_llm(temperature=0.1)
-    prompt = EVALUATOR_PROMPT.format(
+    prompt = build_evaluator_prompt(
         topic=state["topic"],
         audience=state.get("target_audience", "general readers"),
         tone=state.get("tone", "informative"),
-        content=final_blog.full_content[:4000]  # Cap context for evaluation
+        content=final_blog.full_content,
     )
 
     try:
         response = await llm.ainvoke(prompt)
-        raw = response.content.strip()
-
-        # Clean markdown fences
-        if raw.startswith("```"):
-            lines = raw.splitlines()
-            if lines[0].startswith("```"):
-                raw = "\n".join(lines[1:-1])
-        raw = raw.strip()
-        if raw.startswith("json"):
-            raw = raw[4:].strip()
-
-        data = json.loads(raw)
-        
-        evaluation = BlogEvaluation(
-            score=data.get("score", 0),
-            reasoning=data.get("reasoning", "No reasoning provided"),
-            suggestions=data.get("suggestions", []),
-            is_pass=data.get("is_pass", False)
-        )
+        evaluation = parse_evaluation(response.content)
 
         if evaluation.is_pass:
             log_success(f"Evaluation PASSED (Score: {evaluation.score}/10)")

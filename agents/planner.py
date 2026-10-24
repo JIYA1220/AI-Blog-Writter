@@ -6,13 +6,23 @@
 # workers don't improvise, they execute a structured spec.
 # ============================================================
 
-import json
 import os
 from utils.llm import get_llm
+from utils.json_utils import parse_llm_json
 from utils.logger import log_stage, log_info, log_success
 from schemas.models import BlogPlan, SectionPlan, AIBlogWriterState
 
-WORD_BUDGET = int(os.getenv("SECTION_WORD_BUDGET", 300))
+DEFAULT_SECTION_WORD_BUDGET = 300
+NUM_SECTIONS = 5
+
+
+def section_word_budget() -> int:
+    """Words per section from SECTION_WORD_BUDGET (read at call time; default 300)."""
+    try:
+        value = int(os.getenv("SECTION_WORD_BUDGET", DEFAULT_SECTION_WORD_BUDGET))
+    except ValueError:
+        return DEFAULT_SECTION_WORD_BUDGET
+    return value if value > 0 else DEFAULT_SECTION_WORD_BUDGET
 
 PLANNER_PROMPT = """You are a senior content strategist. Create a detailed blog plan.
 
@@ -73,9 +83,8 @@ async def planner_node(state: AIBlogWriterState) -> dict:
     else:
         research_context = "No retrieval data — use general knowledge."
 
-    total_budget = 1500
-    num_sections = 5
-    section_budget = total_budget // num_sections
+    section_budget = section_word_budget()
+    total_budget = section_budget * NUM_SECTIONS
 
     llm = get_llm(temperature=0.4)
     prompt = PLANNER_PROMPT.format(
@@ -89,20 +98,7 @@ async def planner_node(state: AIBlogWriterState) -> dict:
 
     try:
         response = await llm.ainvoke(prompt)
-        raw = response.content.strip()
-
-        # Clean markdown fences
-        if raw.startswith("```"):
-            lines = raw.splitlines()
-            if lines[0].startswith("```"):
-                raw = "\n".join(lines[1:-1])
-        raw = raw.strip()
-
-        # Handle case where model might put 'json' at the start
-        if raw.startswith("json"):
-            raw = raw[4:].strip()
-
-        data = json.loads(raw)
+        data = parse_llm_json(response.content)
 
         # Build validated BlogPlan
         sections = []
@@ -112,7 +108,7 @@ async def planner_node(state: AIBlogWriterState) -> dict:
                 title=s.get("title", f"Section {i+1}"),
                 goal=s.get("goal", "Cover this topic clearly"),
                 constraints=s.get("constraints", []),
-                word_budget=s.get("word_budget", WORD_BUDGET),
+                word_budget=section_budget,  # configured budget always wins over the model's echo
                 requires_retrieval=s.get("requires_retrieval", False)
             )
             sections.append(section)
@@ -135,11 +131,11 @@ async def planner_node(state: AIBlogWriterState) -> dict:
         log_stage("PLANNER", f"JSON parse failed — using fallback plan: {e}", style="bold yellow")
         # Fallback plan if LLM returns bad JSON
         fallback_sections = [
-            SectionPlan(section_id=0, title="Introduction", goal="Hook the reader", word_budget=WORD_BUDGET),
-            SectionPlan(section_id=1, title="Background", goal="Provide context", word_budget=WORD_BUDGET),
-            SectionPlan(section_id=2, title="Core Concepts", goal="Explain the main ideas", word_budget=WORD_BUDGET),
-            SectionPlan(section_id=3, title="Practical Applications", goal="Show real-world use", word_budget=WORD_BUDGET),
-            SectionPlan(section_id=4, title="Conclusion", goal="Summarise and call to action", word_budget=WORD_BUDGET),
+            SectionPlan(section_id=0, title="Introduction", goal="Hook the reader", word_budget=section_budget),
+            SectionPlan(section_id=1, title="Background", goal="Provide context", word_budget=section_budget),
+            SectionPlan(section_id=2, title="Core Concepts", goal="Explain the main ideas", word_budget=section_budget),
+            SectionPlan(section_id=3, title="Practical Applications", goal="Show real-world use", word_budget=section_budget),
+            SectionPlan(section_id=4, title="Conclusion", goal="Summarise and call to action", word_budget=section_budget),
         ]
         blog_plan = BlogPlan(topic=topic, target_audience=audience, tone=tone, sections=fallback_sections)
         return {"blog_plan": blog_plan, "errors": [f"Planner parse error: {str(e)}"]}
