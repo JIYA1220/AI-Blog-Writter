@@ -12,6 +12,7 @@
 <img src="https://img.shields.io/badge/Tavily-Web%20Search-111827?style=for-the-badge" />
 <img src="https://img.shields.io/badge/Ollama-Local%20LLMs-1F2937?style=for-the-badge" />
 <img src="https://img.shields.io/badge/OpenRouter-Cloud%20LLMs-F59E0B?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Groq-Cloud%20LLMs-F55036?style=for-the-badge" />
 <img src="https://img.shields.io/badge/Gemini-Google%20GenAI-2563EB?style=for-the-badge" />
 <img src="https://img.shields.io/badge/Pydantic-Types%20%26%20Validation-16A34A?style=for-the-badge" />
 <img src="https://img.shields.io/badge/Rich-CLI%20UI-22C55E?style=for-the-badge" />
@@ -26,186 +27,113 @@
 
 </div>
 
----  
-Run it via **CLI**, **Streamlit UI**, or a **FastAPI server**.
+Give it a topic, an audience and a tone. It plans the post, writes the sections in parallel, merges them into one markdown file, and has an LLM editor score the result. Run it from the **CLI**, a **Streamlit UI**, or a **FastAPI server**. The repo also contains a small audit of its own LLM judge (see [Judge audit](#judge-audit)).
 
----
+## Quick start
 
-##  Tools / Tech Stack (Top)
-
-**Core Orchestration**
-- **LangGraph** — stateful DAG orchestration (async) + parallel fan-out
-- **LangChain** — LLM tooling & integrations
-
-**LLM Providers (choose one)**
-- **Ollama (local)** — run models locally (no cloud key needed)
-- **OpenRouter (cloud)** — access multiple hosted models
-- **Google Gemini (cloud)** — Google GenAI models
-
-**Grounding / Search**
-- **Tavily**: web search for retrieval (used only when `TAVILY_API_KEY` is set)
-
-**UI / API**
-- **Streamlit** — interactive app (generate + browse past blogs)
-- **FastAPI** + **Uvicorn** — REST API for production use
-
-**Observability**
-- **LangSmith**: tracing, enabled when `LANGSMITH_API_KEY` is set
-
-**Developer Experience**
-- **Pydantic v2** — typed schemas + validation
-- **Rich** — clean CLI UI/logging
-- **pytest** + **httpx**: offline test suite, run in GitHub Actions
-
----
-
-##  Demo Video
-
- **Watch / Download:** [demo.mp4](assets/demo.mp4)
-
-
----
-
-##  What it does
-
-Given:
-- a **topic**
-- a **target audience**
-- a **tone**
-
-…this system:
-1. decides whether the topic needs retrieval (**router**; always chooses generation when no Tavily key is set)
-2. retrieves web evidence via Tavily when the router asks for it (**retriever**)
-3. creates a structured multi-section plan (**planner**)
-4. writes sections **in parallel** (**writer fan-out**)
-5. merges sections into a final markdown blog (**reducer**)
-6. scores the result 1 to 10 with an LLM judge, pass if the score is 7 or higher (**evaluator**)
-
-Generated blogs are saved as `.md` files under `output/`.
-
----
-
-##  Architecture (LangGraph DAG)
-
-```text
-START
-  └─► ROUTER (Async)    ── Decide: Retrieval vs Generation
-        ├─► RETRIEVER   ── Tavily Search + Deduplication (optional)
-        └─► PLANNER     ── Structured BlogPlan (Section Goals)
-              └─► DISPATCHER ── Parallel Fan-Out (Send API)
-                    ├─► WRITER [Section 0] ┐
-                    ├─► WRITER [Section 1] ├─ Parallel Async
-                    └─► WRITER [Section N] ┘
-                          └─► REDUCER     ── Merge & Save Markdown
-                                └─► EVALUATOR ── LLM-as-Judge (Score + Feedback)
-                                      └─► END
-```
-
----
-
-##  Installation
-
-### 1) Clone the repo
 ```bash
 git clone https://github.com/JIYA1220/Ai-Blog-Writter.git
 cd Ai-Blog-Writter
-```
-
-### 2) Create a virtual environment (recommended)
-```bash
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-source .venv/bin/activate
-```
-
-### 3) Install dependencies
-```bash
+python -m venv .venv && source .venv/bin/activate    # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env                                  # default model: local Ollama (ollama pull qwen2.5:7b)
+streamlit run app.py
 ```
+
+Run the tests (no network and no API keys needed): `pytest -q`
 
 ---
 
-##  Environment Variables
+## Demo video
 
-Copy `.env.example` → `.env`:
+**Watch or download:** [demo.mp4](assets/demo.mp4)
 
-```bash
-cp .env.example .env
+---
+
+## What it does
+
+1. **Router** decides whether the topic needs web retrieval. With no Tavily key it always chooses generation.
+2. **Retriever** searches the web through Tavily when the router asks for it, and removes duplicate snippets.
+3. **Planner** creates a structured multi-section plan (titles, goals, constraints, word budgets).
+4. **Writers** write the sections in parallel, one worker per section.
+5. **Reducer** merges the sections in a fixed order into one markdown post and saves it under `output/`.
+6. **Evaluator** scores the post from 1 to 10 with an LLM judge; 7 or more counts as a pass.
+
+---
+
+## Architecture (LangGraph DAG)
+
+```text
+START
+  └─► ROUTER (Async)    : decide retrieval or generation
+        ├─► RETRIEVER   : Tavily search + deduplication (optional)
+        └─► PLANNER     : structured BlogPlan (section goals)
+              └─► DISPATCHER : parallel fan-out (Send API)
+                    ├─► WRITER [Section 0] ┐
+                    ├─► WRITER [Section 1] ├─ parallel async
+                    └─► WRITER [Section N] ┘
+                          └─► REDUCER     : merge in order, save markdown
+                                └─► EVALUATOR : LLM judge (score + feedback)
+                                      └─► END
 ```
 
+Stack: LangGraph and LangChain for orchestration, Pydantic v2 for typed state and outputs, Streamlit and FastAPI with Uvicorn for the interfaces, Rich for CLI logging, LangSmith for optional tracing, and pytest with httpx for tests.
+
+---
+
+## Configuration
+
+Copy `.env.example` to `.env` and fill in only what you use. `.env` is git-ignored; never commit it.
+
 ### Choosing a model provider
+
 `MODEL_NAME` selects the provider (default: `ollama/qwen2.5:7b`):
 
 | `MODEL_NAME` | Provider | Needs |
 |---|---|---|
 | `ollama/<model>` | local Ollama | Ollama running, no key |
-| `openrouter/<model>` | OpenRouter (OpenAI-compatible client, `https://openrouter.ai/api/v1`) | `OPENROUTER_API_KEY` |
-| `groq/<model>` | Groq (OpenAI-compatible client, `https://api.groq.com/openai/v1`) | `GROQ_API_KEY` |
+| `openrouter/<model>` | OpenRouter (OpenAI-compatible, `https://openrouter.ai/api/v1`) | `OPENROUTER_API_KEY` |
+| `groq/<model>` | Groq (OpenAI-compatible, `https://api.groq.com/openai/v1`) | `GROQ_API_KEY` |
 | any other name | Google Gemini | `GOOGLE_API_KEY` |
 
-OpenRouter works through its OpenAI-compatible endpoint. (Before this change an OpenRouter key was passed to the Gemini client, so OpenRouter models failed.) A bare `vendor/model` name is also sent to OpenRouter when only `OPENROUTER_API_KEY` is set. Use the explicit `openrouter/` prefix. A missing key raises a clear error that names the variable. Use a Gemini model name that is currently available in Google's docs; no Gemini default is set.
+A bare `vendor/model` name is also sent to OpenRouter when only `OPENROUTER_API_KEY` is set, but the explicit `openrouter/` prefix is preferred. A missing key raises an error that names the variable. For Gemini, use a model name that is currently available in Google's docs; no Gemini default is set.
 
 ### Other variables
-- `TAVILY_API_KEY`: enables web retrieval. Without it the router always chooses generation.
-- `ENABLE_SEARCH`: set to `false` to disable retrieval even with a key.
-- `SECTION_WORD_BUDGET`: words per section (default 300).
-- `EVALUATOR_MAX_CHARS`: how many characters of a post the judge reads (default 20000, enough for posts of about 2,500 words). A longer post is cut from the end and a warning is logged. Lower it for a model whose context window cannot hold a full post.
-- `MAX_CONCURRENCY`: parallel section writers in the CLI (default 3).
-- `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT`: enable LangSmith tracing.
 
-Example `.env`:
-```env
-MODEL_NAME=ollama/qwen2.5:7b
-# MODEL_NAME=openrouter/meta-llama/llama-3.1-8b-instruct:free
-# OPENROUTER_API_KEY=...
-# TAVILY_API_KEY=...
+| Variable | Meaning | Default |
+|---|---|---|
+| `TAVILY_API_KEY` | enables web retrieval; without it the router always chooses generation | unset |
+| `ENABLE_SEARCH` | set to `false` to disable retrieval even with a key | `true` |
+| `SECTION_WORD_BUDGET` | words per section | `300` |
+| `EVALUATOR_MAX_CHARS` | characters of a post the judge reads; a longer post is cut from the end and a warning is logged | `20000` (about 2,500 words) |
+| `MAX_CONCURRENCY` | parallel section writers in the CLI | `3` |
+| `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT` | enable LangSmith tracing | unset |
 
-SECTION_WORD_BUDGET=300
-MAX_CONCURRENCY=3
-```
+Lower `EVALUATOR_MAX_CHARS` for a model whose context window cannot hold a full post.
 
 ---
 
-##  How to Run
+## How to run
 
-You can run the system in **three modes**:
-
-### 1) CLI Mode
+### CLI
 ```bash
 python main.py
 ```
 
-### 2) Streamlit UI (recommended)
+### Streamlit UI (recommended)
 ```bash
 streamlit run app.py
 ```
+It has a form for topic, audience and tone, a sidebar to browse earlier posts in `output/`, and a download button.
 
-What you get:
-- a blog generation form (topic / audience / tone)
-- a sidebar to browse previously generated markdown files in `output/`
-- download button for generated blogs
-
-### 3) FastAPI Server (REST API)
+### FastAPI server
 ```bash
-python server.py
+python server.py        # http://localhost:8000
 ```
 
-Server runs at:
-- `http://localhost:8000`
-
----
-
-##  API Usage (FastAPI)
-
-### Health check
 ```bash
 curl http://localhost:8000/
-```
 
-### Generate a blog
-```bash
 curl -X POST "http://localhost:8000/generate" \
   -H "Content-Type: application/json" \
   -d '{
@@ -215,14 +143,39 @@ curl -X POST "http://localhost:8000/generate" \
   }'
 ```
 
-Response includes:
-- blog `title` + full markdown `content`
-- evaluation `score` and `evaluation` text (both `null` if the judge reply could not be parsed)
-- `word_count`
+The response has the post `title` and markdown `content`, the evaluation `score` and `evaluation` text (both `null` if the judge reply could not be parsed), and `word_count`.
 
 ---
 
-##  Project Structure
+## Testing
+
+```bash
+pytest -q
+```
+
+The offline suite has 120 tests and needs no network and no API keys. It uses a scripted fake LLM to cover: Pydantic schemas, both router branches, the dispatcher (one `Send` per section), deterministic reducer ordering, JSON parsing (plain, fenced, invalid), provider selection in `get_llm`, the full graph with and without retrieval, the evaluator reading a full-length post, the FastAPI `/generate` endpoint, and the statistics used by the judge audit. GitHub Actions runs it on every push.
+
+---
+
+## Judge audit
+
+The LLM judge was audited on 60 generated posts (30 topics, each written as a short and a long version) with a 120B judge. The audit measures consistency and robustness. **Agreement with a human reader was not measured, so it does not show that the judge is accurate.**
+
+| Finding | Result |
+|---|---|
+| The old evaluator showed the judge only the first 4,000 characters. On the 56 posts longer than that, the pass rate was | 25.0% (14/56) on the truncated view and 80.4% (45/56) on the full text; the pass/fail verdict changed on 33 of 56 posts |
+| Fix | the evaluator now reads the whole post up to `EVALUATOR_MAX_CHARS` and logs a warning if it must cut one |
+| Pairwise comparison (short post against long post, both orders) | the same post won in both orders on 76.7% (23/30) of topics |
+| Position effect | in 6 of the 7 flipped topics the first-shown post won both orders, but an exact binomial test gives p = 0.125, so it is not significant |
+| Repeatability | mean score difference between runs of 0.20 points |
+
+The before/after of the fix compares the same posts and the same judge using replies that already existed; the live pipeline was not re-run. The long posts are about twice the length of the short ones, so length and variant are confounded in the pairwise results. A local 3B judge was also tried and gave almost every post an 8, so it was not used for any conclusion.
+
+Read more: [`evaluation/STUDY_SUMMARY.md`](evaluation/STUDY_SUMMARY.md) (summary, including how the Groq daily token limit was handled) and [`evaluation/REPORT.md`](evaluation/REPORT.md) (tables, exact prompts and the commands that were run).
+
+---
+
+## Project structure
 
 ```text
 .
@@ -230,66 +183,49 @@ Response includes:
 ├── server.py            # FastAPI server
 ├── app.py               # Streamlit UI
 ├── graph.py             # LangGraph DAG definition
-├── list_models.py       # Lists Gemini models for your key (needs the extra package google-generativeai)
-├── requirements.txt     # Python dependencies
-├── .env.example         # Example env vars
+├── list_models.py       # lists Gemini models for your key (needs the extra package google-generativeai)
+├── requirements.txt     # Python dependencies (not version-pinned)
+├── .env.example         # example environment variables
 │
-├── pytest.ini
-├── tests/               # Offline test suite (no network, no API keys)
-├── .github/workflows/   # CI: runs pytest
-│
-├── agents/              # Graph nodes (router/retriever/planner/writer/reducer/evaluator)
+├── agents/              # graph nodes: router, retriever, planner, writer, reducer, evaluator
 ├── schemas/             # Pydantic models (state + structured outputs)
-├── utils/               # LLM client config, logging helpers, etc.
-└── output/              # Generated blogs saved as .md files
+├── utils/               # LLM client factory, JSON parsing, logging helpers
+├── tests/               # offline test suite (no network, no API keys)
+├── .github/workflows/   # CI: runs pytest
+├── evaluation/          # judge audit: scripts, posts, results, raw call logs, report
+└── output/              # generated blogs saved as .md files
 ```
 
 ---
 
-##  Testing
+## Limitations
 
-```bash
-pytest -q
-```
-
-The offline suite has 120 tests and needs no network and no API keys. It uses a scripted fake LLM to cover: Pydantic schemas, both router branches, the dispatcher (one `Send` per section), deterministic reducer ordering, JSON parsing (plain, fenced, invalid), provider selection in `get_llm`, the full graph with and without retrieval, the evaluator reading a full-length post, and the FastAPI `/generate` endpoint. GitHub Actions runs it on every push.
-
-##  Judge audit
-
-The pipeline's LLM judge was audited on 60 generated posts with a 120B judge. The main finding: the evaluator used to show the judge only the first 4000 characters, and on the 56 longer posts the pass rate went from 25.0% (14/56) to 80.4% (45/56) when the judge saw the full text, so the evaluator now reads the whole post (`EVALUATOR_MAX_CHARS`). The audit measures consistency and robustness only: agreement with a human reader was not measured, so it does not show that the judge is accurate. See [`evaluation/STUDY_SUMMARY.md`](evaluation/STUDY_SUMMARY.md) for the summary and [`evaluation/REPORT.md`](evaluation/REPORT.md) for the tables, prompts and commands.
-
-##  Limitations
-
-- The judge is a single-pass, pointwise LLM score. It reads up to `EVALUATOR_MAX_CHARS` characters (default 20000); a longer post is cut from the end with a logged warning. Before this change it saw only the first 4000 characters.
-- The judge uses the same `MODEL_NAME` as the writers, so it can favour its own style. Its agreement with human judgement has not been measured yet.
+- The judge is a single-pass, pointwise LLM score. It reads up to `EVALUATOR_MAX_CHARS` characters (default 20000); a longer post is cut from the end with a logged warning. Before the fix it saw only the first 4,000 characters.
+- By default the judge uses the same `MODEL_NAME` as the writers, so it can favour its own style. Its agreement with human judgement was not measured.
 - The `is_pass` flag comes from the model's own reply, not from the score.
-- Retrieval only helps if a Tavily key is set; the grounding is snippets pasted into the writer prompt, with no claim-level verification.
+- Retrieval only helps if a Tavily key is set. The grounding is snippets pasted into the writer prompt, with no claim-level verification.
 - Section writers run in parallel and do not see each other's text, so sections can overlap or repeat.
 - `requirements.txt` is not version-pinned.
 
 ---
 
-##  Troubleshooting
+## Troubleshooting
 
-### “.env file not found!”
-Create one:
-```bash
-cp .env.example .env
-```
+**".env file not found"**: create one with `cp .env.example .env`.
 
-### Generation fails / empty output
-Common causes:
-- missing API key (Gemini/OpenRouter)
-- wrong `MODEL_NAME`
-- provider not reachable (network issue)
-- Ollama not running locally (if using `ollama/...` model)
+**Generation fails or the output is empty.** Common causes:
+- the API key for your provider is missing (`GOOGLE_API_KEY`, `OPENROUTER_API_KEY` or `GROQ_API_KEY`)
+- `MODEL_NAME` is wrong or has no provider prefix
+- the provider is not reachable (network issue)
+- Ollama is not running (if you use an `ollama/...` model)
 
-### Ollama tips (local)
-Install Ollama and ensure it’s running, then pull your model:
+**Ollama (local).** Install Ollama, make sure it is running, then pull your model:
 ```bash
 ollama pull qwen2.5:7b
 ```
 
-## 👤 Author
+---
+
+## Author
 
 Built by **@JIYA1220**.
