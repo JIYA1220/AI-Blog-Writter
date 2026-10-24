@@ -1,0 +1,18 @@
+{
+  "post_id": "t11_A",
+  "topic_id": "t11",
+  "variant": "A",
+  "topic": "How electric cars store and use energy",
+  "audience": "curious general readers with no specialist background",
+  "tone": "informative and engaging",
+  "section_word_budget": 150,
+  "retrieval": false,
+  "model": "ollama/qwen2.5:3b",
+  "date": "2026-10-23",
+  "words": 924,
+  "chars": 6484,
+  "sections": 7,
+  "production_ready": true,
+  "pipeline_errors": [],
+  "run_dir": "evaluation\\runs\\generate-20261023-012457"
+}

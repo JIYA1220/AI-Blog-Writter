@@ -1,0 +1,18 @@
+{
+  "post_id": "t22_A",
+  "topic_id": "t22",
+  "variant": "A",
+  "topic": "How to start running without injuring yourself",
+  "audience": "curious general readers with no specialist background",
+  "tone": "informative and engaging",
+  "section_word_budget": 150,
+  "retrieval": false,
+  "model": "ollama/qwen2.5:3b",
+  "date": "2026-10-23",
+  "words": 729,
+  "chars": 4975,
+  "sections": 6,
+  "production_ready": true,
+  "pipeline_errors": [],
+  "run_dir": "evaluation\\runs\\generate-20261023-012457"
+}

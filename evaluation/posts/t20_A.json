@@ -1,0 +1,18 @@
+{
+  "post_id": "t20_A",
+  "topic_id": "t20",
+  "variant": "A",
+  "topic": "Common cognitive biases and how to spot them",
+  "audience": "curious general readers with no specialist background",
+  "tone": "informative and engaging",
+  "section_word_budget": 150,
+  "retrieval": false,
+  "model": "ollama/qwen2.5:3b",
+  "date": "2026-10-23",
+  "words": 712,
+  "chars": 5156,
+  "sections": 6,
+  "production_ready": true,
+  "pipeline_errors": [],
+  "run_dir": "evaluation\\runs\\generate-20261023-012457"
+}

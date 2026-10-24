@@ -1,0 +1,7 @@
+{
+  "judge_model": "gemini-3.5-flash",
+  "temperature": 0.1,
+  "n_calls": 60,
+  "prompt": "You are a senior editor comparing two blog posts written on the same topic.\n\nTopic: {topic}\nTarget Audience: {audience}\nRequested Tone: {tone}\n\n===== Post A =====\n{post_a}\n\n===== Post B =====\n{post_b}\n\nDecide which post is better overall, judging:\n1. Relevance to topic and audience.\n2. Adherence to the requested tone.\n3. Logical flow and structure.\n4. Depth of information.\n\nRespond ONLY with valid JSON:\n{{\n  \"winner\": \"A\" or \"B\" or \"tie\",\n  \"reason\": \"one short sentence\"\n}}\n",
+  "date": "2026-10-23"
+}
