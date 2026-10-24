@@ -1,5 +1,7 @@
 # AI Blog Writer (Agentic Blog Generation System)
 
+[![tests](https://github.com/JIYA1220/Ai-Blog-Writter/actions/workflows/tests.yml/badge.svg)](https://github.com/JIYA1220/Ai-Blog-Writter/actions/workflows/tests.yml)
+
 <div align="center">
 
 <!-- BADGES / STACK (TOP) -->
@@ -18,7 +20,7 @@
 
 <br/><br/>
 
-<b>An agentic, production-style blog writing system</b> built as a <b>stateful, async LangGraph DAG</b> with <b>parallel section writing</b>, optional <b>web grounding</b>, and <b>LLM-as-a-judge evaluation</b>.
+<b>An agentic blog writing system</b> built as a <b>stateful, async LangGraph DAG</b> with <b>parallel section writing</b>, optional <b>web grounding</b>, and an <b>LLM-as-a-judge evaluator</b>.
 
 <br/>
 
@@ -40,20 +42,20 @@ Run it via **CLI**, **Streamlit UI**, or a **FastAPI server**.
 - **OpenRouter (cloud)** — access multiple hosted models
 - **Google Gemini (cloud)** — Google GenAI models
 
-**Grounding / Search (Optional)**
-- **Tavily** — web search for retrieval + reducing hallucinations
+**Grounding / Search**
+- **Tavily**: web search for retrieval (used only when `TAVILY_API_KEY` is set)
 
 **UI / API**
 - **Streamlit** — interactive app (generate + browse past blogs)
 - **FastAPI** + **Uvicorn** — REST API for production use
 
-**Observability (Optional)**
-- **LangSmith** — traces, debugging, latency/cost insight (if you configure it)
+**Observability**
+- **LangSmith**: tracing, enabled when `LANGSMITH_API_KEY` is set
 
 **Developer Experience**
 - **Pydantic v2** — typed schemas + validation
 - **Rich** — clean CLI UI/logging
-- **pytest** + **httpx** — testing utilities
+- **pytest** + **httpx**: offline test suite, run in GitHub Actions
 
 ---
 
@@ -72,12 +74,12 @@ Given:
 - a **tone**
 
 …this system:
-1. decides whether the topic needs retrieval (**router**)
-2. optionally retrieves grounded info via Tavily (**retriever**)
+1. decides whether the topic needs retrieval (**router**; always chooses generation when no Tavily key is set)
+2. retrieves web evidence via Tavily when the router asks for it (**retriever**)
 3. creates a structured multi-section plan (**planner**)
 4. writes sections **in parallel** (**writer fan-out**)
 5. merges sections into a final markdown blog (**reducer**)
-6. evaluates the output with an LLM-based editor (**evaluator**)
+6. scores the result 1 to 10 with an LLM judge, pass if the score is 7 or higher (**evaluator**)
 
 Generated blogs are saved as `.md` files under `output/`.
 
@@ -133,23 +135,32 @@ Copy `.env.example` → `.env`:
 cp .env.example .env
 ```
 
-### Required (depends on your provider)
-- **If using Gemini**: `GOOGLE_API_KEY`
-- **If using OpenRouter**: `OPENROUTER_API_KEY`
-- **If using Ollama locally**: no API key needed, but Ollama must be installed & running
+### Choosing a model provider
+`MODEL_NAME` selects the provider (default: `ollama/qwen2.5:7b`):
 
-### Optional (recommended)
-- `TAVILY_API_KEY` — enables web retrieval/grounding
-- `MAX_CONCURRENCY` — parallel section writers
-- `SECTION_WORD_BUDGET` — max words per section
-- *(Optional if your code supports it)* `LANGSMITH_API_KEY` — tracing/observability
+| `MODEL_NAME` | Provider | Needs |
+|---|---|---|
+| `ollama/<model>` | local Ollama | Ollama running, no key |
+| `openrouter/<model>` | OpenRouter (OpenAI-compatible client, `https://openrouter.ai/api/v1`) | `OPENROUTER_API_KEY` |
+| `groq/<model>` | Groq (OpenAI-compatible client, `https://api.groq.com/openai/v1`) | `GROQ_API_KEY` |
+| any other name | Google Gemini | `GOOGLE_API_KEY` |
+
+OpenRouter works through its OpenAI-compatible endpoint. (Before this change an OpenRouter key was passed to the Gemini client, so OpenRouter models failed.) A bare `vendor/model` name is also sent to OpenRouter when only `OPENROUTER_API_KEY` is set. Use the explicit `openrouter/` prefix. A missing key raises a clear error that names the variable. Use a Gemini model name that is currently available in Google's docs; no Gemini default is set.
+
+### Other variables
+- `TAVILY_API_KEY`: enables web retrieval. Without it the router always chooses generation.
+- `ENABLE_SEARCH`: set to `false` to disable retrieval even with a key.
+- `SECTION_WORD_BUDGET`: words per section (default 300).
+- `EVALUATOR_MAX_CHARS`: how many characters of a post the judge reads (default 20000, enough for posts of about 2,500 words). A longer post is cut from the end and a warning is logged. Lower it for a model whose context window cannot hold a full post.
+- `MAX_CONCURRENCY`: parallel section writers in the CLI (default 3).
+- `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT`: enable LangSmith tracing.
 
 Example `.env`:
 ```env
 MODEL_NAME=ollama/qwen2.5:7b
-# GOOGLE_API_KEY=your_gemini_api_key_here
-# OPENROUTER_API_KEY=your_openrouter_api_key_here
-# TAVILY_API_KEY=your_tavily_api_key_here
+# MODEL_NAME=openrouter/meta-llama/llama-3.1-8b-instruct:free
+# OPENROUTER_API_KEY=...
+# TAVILY_API_KEY=...
 
 SECTION_WORD_BUDGET=300
 MAX_CONCURRENCY=3
@@ -206,7 +217,7 @@ curl -X POST "http://localhost:8000/generate" \
 
 Response includes:
 - blog `title` + full markdown `content`
-- optional evaluation `score` and `evaluation`
+- evaluation `score` and `evaluation` text (both `null` if the judge reply could not be parsed)
 - `word_count`
 
 ---
@@ -219,9 +230,13 @@ Response includes:
 ├── server.py            # FastAPI server
 ├── app.py               # Streamlit UI
 ├── graph.py             # LangGraph DAG definition
-├── list_models.py       # Utility to list/inspect configured models (if used)
+├── list_models.py       # Lists Gemini models for your key (needs the extra package google-generativeai)
 ├── requirements.txt     # Python dependencies
 ├── .env.example         # Example env vars
+│
+├── pytest.ini
+├── tests/               # Offline test suite (no network, no API keys)
+├── .github/workflows/   # CI: runs pytest
 │
 ├── agents/              # Graph nodes (router/retriever/planner/writer/reducer/evaluator)
 ├── schemas/             # Pydantic models (state + structured outputs)
@@ -231,12 +246,22 @@ Response includes:
 
 ---
 
-##  Testing (optional)
+##  Testing
 
-If/when you add tests:
 ```bash
 pytest -q
 ```
+
+The offline suite has 79 tests and needs no network and no API keys. It uses a scripted fake LLM to cover: Pydantic schemas, both router branches, the dispatcher (one `Send` per section), deterministic reducer ordering, JSON parsing (plain, fenced, invalid), provider selection in `get_llm`, the full graph with and without retrieval, the evaluator reading a full-length post, and the FastAPI `/generate` endpoint. GitHub Actions runs it on every push.
+
+##  Limitations
+
+- The judge is a single-pass, pointwise LLM score. It reads up to `EVALUATOR_MAX_CHARS` characters (default 20000); a longer post is cut from the end with a logged warning. Before this change it saw only the first 4000 characters.
+- The judge uses the same `MODEL_NAME` as the writers, so it can favour its own style. Its agreement with human judgement has not been measured yet.
+- The `is_pass` flag comes from the model's own reply, not from the score.
+- Retrieval only helps if a Tavily key is set; the grounding is snippets pasted into the writer prompt, with no claim-level verification.
+- Section writers run in parallel and do not see each other's text, so sections can overlap or repeat.
+- `requirements.txt` is not version-pinned.
 
 ---
 
