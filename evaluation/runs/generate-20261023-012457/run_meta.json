@@ -1,0 +1,14 @@
+{
+  "model": "ollama/qwen2.5:3b",
+  "variants": {
+    "A": 150,
+    "B": 400
+  },
+  "retrieval": false,
+  "temperatures": {
+    "planner": 0.4,
+    "writer": 0.7
+  },
+  "date": "2026-10-23",
+  "n_posts_planned": 60
+}

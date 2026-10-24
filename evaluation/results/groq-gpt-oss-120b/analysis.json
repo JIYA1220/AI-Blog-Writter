@@ -1,0 +1,182 @@
+{
+  "study1_calls": {
+    "rows": 351,
+    "parsed_ok": 348,
+    "failed_to_parse": 3
+  },
+  "score_distribution": {
+    "truncated": {
+      "4": 1,
+      "5": 21,
+      "6": 88,
+      "7": 62,
+      "8": 8
+    },
+    "full": {
+      "5": 3,
+      "6": 20,
+      "7": 75,
+      "8": 70
+    },
+    "modal_score": 7,
+    "modal_score_share": {
+      "k": 137,
+      "n": 348,
+      "p": 0.3936781609195402,
+      "wilson95": [
+        0.3437747861540759,
+        0.4459032962557357
+      ]
+    }
+  },
+  "is_pass_vs_score": {
+    "parsed_replies": 348,
+    "is_pass_disagrees_with_score_ge_7": 0
+  },
+  "failed_attempts_later_succeeded": 3,
+  "failed_replies_by_condition": {
+    "full": 3
+  },
+  "test_retest": {
+    "n_posts": 60,
+    "mean_abs_diff": 0.19999999999999998,
+    "mean_abs_diff_ci95": [
+      0.12222222222222223,
+      0.27777777777777773
+    ],
+    "share_posts_all_runs_identical": {
+      "k": 42,
+      "n": 60,
+      "p": 0.7,
+      "wilson95": [
+        0.5749105303360957,
+        0.801019897472731
+      ]
+    },
+    "share_run_pairs_identical": {
+      "k": 144,
+      "n": 180,
+      "p": 0.8,
+      "wilson95": [
+        0.7355701522001451,
+        0.8518920979108201
+      ]
+    }
+  },
+  "truncation": {
+    "n_long_posts": 56,
+    "mean_diff_full_minus_truncated": 1.0476190476190477,
+    "mean_diff_ci95": [
+      0.8988095238095237,
+      1.2023809523809523
+    ],
+    "mean_abs_diff": 1.0595238095238095,
+    "share_changed_by_1_or_more_points": {
+      "k": 37,
+      "n": 56,
+      "p": 0.6607142857142857,
+      "wilson95": [
+        0.5299920896078809,
+        0.7708020068066535
+      ]
+    },
+    "share_pass_fail_flipped": {
+      "k": 33,
+      "n": 56,
+      "p": 0.5892857142857143,
+      "wilson95": [
+        0.45877362113703657,
+        0.7083342102043715
+      ]
+    },
+    "runs_per_post_truncated": [
+      3,
+      3
+    ],
+    "runs_per_post_full": [
+      3,
+      3
+    ]
+  },
+  "pairwise_parse": {
+    "topic_orders_attempted": 60,
+    "topic_orders_parsed": 60,
+    "log_rows_including_retries": 60
+  },
+  "position_bias": {
+    "n_topics": 30,
+    "inconsistency_rate": {
+      "k": 7,
+      "n": 30,
+      "p": 0.23333333333333334,
+      "wilson95": [
+        0.11792239210501232,
+        0.40928672330324267
+      ]
+    },
+    "among_inconsistent": {
+      "n": 7,
+      "first_shown_won_in_both_orders": {
+        "k": 6,
+        "n": 7,
+        "p": 0.8571428571428571,
+        "wilson95": [
+          0.48686549668097007,
+          0.9743210440510253
+        ]
+      },
+      "second_shown_won_in_both_orders": {
+        "k": 1,
+        "n": 7,
+        "p": 0.14285714285714285,
+        "wilson95": [
+          0.02567895594897479,
+          0.51313450331903
+        ]
+      },
+      "involved_a_tie_in_one_order": {
+        "k": 0,
+        "n": 7,
+        "p": 0.0,
+        "wilson95": [
+          0.0,
+          0.35433884297520657
+        ]
+      }
+    },
+    "first_shown_share_of_all_decisive_verdicts": {
+      "k": 35,
+      "n": 60,
+      "p": 0.5833333333333334,
+      "wilson95": [
+        0.45727854313239624,
+        0.6993591351212818
+      ]
+    },
+    "verdict_counts_by_order": {
+      "AB": {
+        "B": 19,
+        "A": 11
+      },
+      "BA": {
+        "B": 24,
+        "A": 6
+      }
+    }
+  },
+  "completeness": {
+    "pointwise_truncated": {
+      "parsed": 180,
+      "planned": 180
+    },
+    "pointwise_full": {
+      "parsed": 168,
+      "planned": 168
+    },
+    "pairwise": {
+      "parsed": 60,
+      "planned": 60
+    },
+    "complete": true
+  }
+}

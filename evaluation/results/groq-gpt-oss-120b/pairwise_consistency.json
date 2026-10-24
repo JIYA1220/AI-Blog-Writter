@@ -1,0 +1,62 @@
+{
+  "judge_tag": "groq-gpt-oss-120b",
+  "source": "existing replies in evaluation/results/groq-gpt-oss-120b/pairwise_raw.csv; no LLM calls were made",
+  "measures": "consistency only, not accuracy",
+  "n_topics": 30,
+  "same_winner_in_both_orders": {
+    "k": 23,
+    "n": 30,
+    "p": 0.7666666666666667,
+    "wilson95": [
+      0.5907132766967574,
+      0.8820776078949878
+    ]
+  },
+  "among_consistent_topics": {
+    "n": 23,
+    "winner_counts": {
+      "A_short": 5,
+      "B_long": 18,
+      "tie": 0
+    },
+    "B_long_won": {
+      "k": 18,
+      "n": 23,
+      "p": 0.782608695652174,
+      "wilson95": [
+        0.5809611981726508,
+        0.9033616439828094
+      ]
+    },
+    "note": "Variant B is about twice as long as variant A, so 'B won' is confounded with length."
+  },
+  "among_flipped_topics": {
+    "n": 7,
+    "first_shown_won_in_both_orders": 6,
+    "second_shown_won_in_both_orders": 1,
+    "tie_in_one_order": 0,
+    "binomial_test": {
+      "question": "Among flipped topics, did the first-shown post win more often than chance (50%)?",
+      "k_first_shown_won_in_both_orders": 6,
+      "n_flipped_topics": 7,
+      "null_probability": 0.5,
+      "p_value_exact_two_sided": 0.125,
+      "significant_at_0.05": false
+    }
+  },
+  "agree_or_tie_rule": {
+    "rule": "accept a verdict only if both orders agree, otherwise call it a tie",
+    "topics_with_an_accepted_verdict": {
+      "k": 23,
+      "n": 30,
+      "p": 0.7666666666666667,
+      "wilson95": [
+        0.5907132766967574,
+        0.8820776078949878
+      ]
+    },
+    "topics_turned_into_a_tie_by_the_rule": 7,
+    "note": "This measures consistency only. It does not show that the accepted verdicts are correct."
+  },
+  "date": "2026-10-24"
+}

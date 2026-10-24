@@ -1,0 +1,18 @@
+{
+  "post_id": "t03_B",
+  "topic_id": "t03",
+  "variant": "B",
+  "topic": "A beginner's guide to personal budgeting",
+  "audience": "curious general readers with no specialist background",
+  "tone": "informative and engaging",
+  "section_word_budget": 400,
+  "retrieval": false,
+  "model": "ollama/qwen2.5:3b",
+  "date": "2026-10-23",
+  "words": 2114,
+  "chars": 14152,
+  "sections": 7,
+  "production_ready": true,
+  "pipeline_errors": [],
+  "run_dir": "evaluation\\runs\\generate-20261023-012457"
+}

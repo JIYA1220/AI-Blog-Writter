@@ -1,0 +1,36 @@
+# 30 varied topics for the judge-reliability study. Edit freely BEFORE generating posts.
+# Audience and tone are fixed for every post so they do not confound the comparison.
+audience: curious general readers with no specialist background
+tone: informative and engaging
+
+topics:
+  - {id: t01, topic: "How vaccines train the immune system"}
+  - {id: t02, topic: "Why sleep matters for learning and memory"}
+  - {id: t03, topic: "A beginner's guide to personal budgeting"}
+  - {id: t04, topic: "How compound interest works"}
+  - {id: t05, topic: "What happens inside a black hole"}
+  - {id: t06, topic: "The basics of container orchestration with Kubernetes"}
+  - {id: t07, topic: "How to prepare for a job interview"}
+  - {id: t08, topic: "The history and impact of the printing press"}
+  - {id: t09, topic: "Why bees are essential to food production"}
+  - {id: t10, topic: "Introduction to machine learning for non-programmers"}
+  - {id: t11, topic: "How electric cars store and use energy"}
+  - {id: t12, topic: "The pros and cons of remote work"}
+  - {id: t13, topic: "Understanding the Indian monsoon"}
+  - {id: t14, topic: "Habits of effective public speakers"}
+  - {id: t15, topic: "How the internet routes a web page to your screen"}
+  - {id: t16, topic: "The science of cooking rice perfectly"}
+  - {id: t17, topic: "What is inflation and why does it matter"}
+  - {id: t18, topic: "The case for learning a second language as an adult"}
+  - {id: t19, topic: "How solar panels turn sunlight into electricity"}
+  - {id: t20, topic: "Common cognitive biases and how to spot them"}
+  - {id: t21, topic: "A short history of the Olympic Games"}
+  - {id: t22, topic: "How to start running without injuring yourself"}
+  - {id: t23, topic: "What blockchain is and what it is not"}
+  - {id: t24, topic: "Why the Moon has phases"}
+  - {id: t25, topic: "Building a home garden on a small balcony"}
+  - {id: t26, topic: "How search engines rank web pages"}
+  - {id: t27, topic: "The role of the Reserve Bank in a national economy"}
+  - {id: t28, topic: "Mindfulness meditation: what the evidence says"}
+  - {id: t29, topic: "How airplanes stay in the air"}
+  - {id: t30, topic: "Tips for writing clear emails at work"}
