@@ -252,7 +252,11 @@ Response includes:
 pytest -q
 ```
 
-The offline suite has 79 tests and needs no network and no API keys. It uses a scripted fake LLM to cover: Pydantic schemas, both router branches, the dispatcher (one `Send` per section), deterministic reducer ordering, JSON parsing (plain, fenced, invalid), provider selection in `get_llm`, the full graph with and without retrieval, the evaluator reading a full-length post, and the FastAPI `/generate` endpoint. GitHub Actions runs it on every push.
+The offline suite has 120 tests and needs no network and no API keys. It uses a scripted fake LLM to cover: Pydantic schemas, both router branches, the dispatcher (one `Send` per section), deterministic reducer ordering, JSON parsing (plain, fenced, invalid), provider selection in `get_llm`, the full graph with and without retrieval, the evaluator reading a full-length post, and the FastAPI `/generate` endpoint. GitHub Actions runs it on every push.
+
+##  Judge audit
+
+The pipeline's LLM judge was audited on 60 generated posts with a 120B judge. The main finding: the evaluator used to show the judge only the first 4000 characters, and on the 56 longer posts the pass rate went from 25.0% (14/56) to 80.4% (45/56) when the judge saw the full text, so the evaluator now reads the whole post (`EVALUATOR_MAX_CHARS`). The audit measures consistency and robustness only: agreement with a human reader was not measured, so it does not show that the judge is accurate. See [`evaluation/STUDY_SUMMARY.md`](evaluation/STUDY_SUMMARY.md) for the summary and [`evaluation/REPORT.md`](evaluation/REPORT.md) for the tables, prompts and commands.
 
 ##  Limitations
 

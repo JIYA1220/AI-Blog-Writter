@@ -1,0 +1,68 @@
+{
+  "what": "Before/after of the evaluator full-text fix on the same posts, the same judge and the same prompt.",
+  "judge_tag": "groq-gpt-oss-120b",
+  "before": "judge sees the first 4000 characters (old evaluator behaviour)",
+  "after": "judge sees the whole post (new default cap is far above these posts)",
+  "pass_rule": "post passes when the mean of its runs is >= 7",
+  "source": "existing replies in evaluation/results/groq-gpt-oss-120b/pointwise_raw.csv; no LLM calls were made",
+  "live_pipeline_rerun": false,
+  "long_posts_in_study": 56,
+  "n_posts": 56,
+  "pass_rate_before_4000_chars": {
+    "k": 14,
+    "n": 56,
+    "p": 0.25,
+    "wilson95": [
+      0.15516915222973843,
+      0.37692892001431927
+    ]
+  },
+  "pass_rate_after_full_text": {
+    "k": 45,
+    "n": 56,
+    "p": 0.8035714285714286,
+    "wilson95": [
+      0.6815514267252283,
+      0.8866151998355589
+    ]
+  },
+  "mean_score_before": 6.214285714285714,
+  "mean_score_after": 7.261904761904762,
+  "mean_score_change": 1.0476190476190477,
+  "mean_score_change_ci95": [
+    0.8988095238095237,
+    1.2023809523809523
+  ],
+  "verdict_changes": {
+    "fail_to_pass": 32,
+    "pass_to_fail": 1,
+    "unchanged": 23
+  },
+  "per_reply_pass_rate_before": {
+    "k": 58,
+    "n": 168,
+    "p": 0.34523809523809523,
+    "wilson95": [
+      0.2775262715665835,
+      0.4198694696276326
+    ]
+  },
+  "per_reply_pass_rate_after": {
+    "k": 145,
+    "n": 168,
+    "p": 0.8630952380952381,
+    "wilson95": [
+      0.8029448891401113,
+      0.9070112565196126
+    ]
+  },
+  "runs_per_post_before": [
+    3,
+    3
+  ],
+  "runs_per_post_after": [
+    3,
+    3
+  ],
+  "date": "2026-10-24"
+}

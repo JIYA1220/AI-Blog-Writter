@@ -1,0 +1,18 @@
+{
+  "post_id": "t10_A",
+  "topic_id": "t10",
+  "variant": "A",
+  "topic": "Introduction to machine learning for non-programmers",
+  "audience": "curious general readers with no specialist background",
+  "tone": "informative and engaging",
+  "section_word_budget": 150,
+  "retrieval": false,
+  "model": "ollama/qwen2.5:3b",
+  "date": "2026-10-23",
+  "words": 740,
+  "chars": 5196,
+  "sections": 6,
+  "production_ready": true,
+  "pipeline_errors": [],
+  "run_dir": "evaluation\\runs\\generate-20261023-012457"
+}

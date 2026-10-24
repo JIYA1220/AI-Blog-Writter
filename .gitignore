@@ -21,3 +21,7 @@ output/*.md
 # OS
 .DS_Store
 Thumbs.db
+
+# Local human-rating files. The rating tool is unused and partial ratings are not committed.
+evaluation/human_labels.csv
+evaluation/label_plan.json

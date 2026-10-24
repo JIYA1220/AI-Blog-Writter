@@ -1,0 +1,177 @@
+{
+  "study1_calls": {
+    "rows": 348,
+    "parsed_ok": 332,
+    "failed_to_parse": 16
+  },
+  "score_distribution": {
+    "truncated": {
+      "8": 170
+    },
+    "full": {
+      "8": 152,
+      "9": 10
+    },
+    "modal_score": 8,
+    "modal_score_share": {
+      "k": 322,
+      "n": 332,
+      "p": 0.9698795180722891,
+      "wilson95": [
+        0.9454507991593493,
+        0.9835585909817173
+      ]
+    }
+  },
+  "is_pass_vs_score": {
+    "parsed_replies": 332,
+    "is_pass_disagrees_with_score_ge_7": 9
+  },
+  "failed_attempts_later_succeeded": 0,
+  "failed_replies_by_condition": {
+    "truncated": 10,
+    "full": 6
+  },
+  "test_retest": {
+    "n_posts": 57,
+    "mean_abs_diff": 0.0,
+    "mean_abs_diff_ci95": [
+      0.0,
+      0.0
+    ],
+    "share_posts_all_runs_identical": {
+      "k": 57,
+      "n": 57,
+      "p": 1.0,
+      "wilson95": [
+        0.936858991216536,
+        0.9999999999999999
+      ]
+    },
+    "share_run_pairs_identical": {
+      "k": 169,
+      "n": 169,
+      "p": 1.0,
+      "wilson95": [
+        0.9777738692536981,
+        1.0
+      ]
+    }
+  },
+  "truncation": {
+    "n_long_posts": 52,
+    "mean_diff_full_minus_truncated": 0.06410256410256411,
+    "mean_diff_ci95": [
+      0.006410256410256421,
+      0.1346153846153846
+    ],
+    "mean_abs_diff": 0.06410256410256411,
+    "share_changed_by_1_or_more_points": {
+      "k": 3,
+      "n": 52,
+      "p": 0.057692307692307696,
+      "wilson95": [
+        0.019813812690573196,
+        0.15642755575159178
+      ]
+    },
+    "share_pass_fail_flipped": {
+      "k": 0,
+      "n": 52,
+      "p": 0.0,
+      "wilson95": [
+        0.0,
+        0.06879459041288215
+      ]
+    },
+    "runs_per_post_truncated": [
+      2,
+      3
+    ],
+    "runs_per_post_full": [
+      3,
+      3
+    ]
+  },
+  "pairwise_parse": {
+    "topic_orders_attempted": 60,
+    "topic_orders_parsed": 35,
+    "log_rows_including_retries": 100
+  },
+  "position_bias": {
+    "n_topics": 13,
+    "inconsistency_rate": {
+      "k": 6,
+      "n": 13,
+      "p": 0.46153846153846156,
+      "wilson95": [
+        0.2320575430148814,
+        0.7085656756816796
+      ]
+    },
+    "among_inconsistent": {
+      "n": 6,
+      "first_shown_won_in_both_orders": {
+        "k": 5,
+        "n": 6,
+        "p": 0.8333333333333334,
+        "wilson95": [
+          0.43649056343635395,
+          0.9699474141282697
+        ]
+      },
+      "second_shown_won_in_both_orders": {
+        "k": 1,
+        "n": 6,
+        "p": 0.16666666666666666,
+        "wilson95": [
+          0.03005258587173032,
+          0.563509436563646
+        ]
+      },
+      "involved_a_tie_in_one_order": {
+        "k": 0,
+        "n": 6,
+        "p": 0.0,
+        "wilson95": [
+          0.0,
+          0.3903430336530645
+        ]
+      }
+    },
+    "first_shown_share_of_all_decisive_verdicts": {
+      "k": 17,
+      "n": 26,
+      "p": 0.6538461538461539,
+      "wilson95": [
+        0.46220229009632996,
+        0.8058798502714787
+      ]
+    },
+    "verdict_counts_by_order": {
+      "AB": {
+        "A": 7,
+        "B": 6
+      },
+      "BA": {
+        "B": 10,
+        "A": 3
+      }
+    }
+  },
+  "completeness": {
+    "pointwise_truncated": {
+      "parsed": 170,
+      "planned": 180
+    },
+    "pointwise_full": {
+      "parsed": 162,
+      "planned": 168
+    },
+    "pairwise": {
+      "parsed": 35,
+      "planned": 60
+    },
+    "complete": false
+  }
+}

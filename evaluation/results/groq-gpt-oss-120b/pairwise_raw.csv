@@ -1,0 +1,61 @@
+topic_id,order,slot_winner,variant_winner,reason,parse_ok,judge_model
+t01,AB,second,B,more comprehensive depth and clearer structure,True,groq/openai/gpt-oss-120b
+t01,BA,first,B,"Provides more comprehensive, well‑structured coverage of how vaccines train immunity while remaining engaging for a general audience.",True,groq/openai/gpt-oss-120b
+t02,AB,second,B,"Post B offers clearer structure, more engaging tone, and deeper, well‑organized information for general readers",True,groq/openai/gpt-oss-120b
+t02,BA,first,B,"Post A provides more detailed explanations and a clearer, more comprehensive coverage for general readers.",True,groq/openai/gpt-oss-120b
+t03,AB,second,B,"Post B offers a more comprehensive, well‑structured guide with deeper, beginner‑friendly details.",True,groq/openai/gpt-oss-120b
+t03,BA,first,B,"More comprehensive, engaging, and better structured for beginners",True,groq/openai/gpt-oss-120b
+t04,AB,second,B,"More thorough, well‑structured and engaging for general readers",True,groq/openai/gpt-oss-120b
+t04,BA,first,B,"More comprehensive, well‑structured, and engaging for a general audience",True,groq/openai/gpt-oss-120b
+t05,AB,first,A,"Clearer structure and fewer factual errors, making it more suitable for a general audience",True,groq/openai/gpt-oss-120b
+t05,BA,second,A,"B offers clearer, more focused explanations with better flow for a general audience",True,groq/openai/gpt-oss-120b
+t06,AB,first,A,Clearer flow and more engaging tone for a general audience,True,groq/openai/gpt-oss-120b
+t06,BA,first,B,"Post A offers deeper, more comprehensive coverage while staying relevant and engaging for a general audience",True,groq/openai/gpt-oss-120b
+t07,AB,second,B,More comprehensive depth and structured coverage while staying engaging,True,groq/openai/gpt-oss-120b
+t07,BA,first,B,"Post A offers deeper, more engaging coverage with stronger structure and richer details for general readers",True,groq/openai/gpt-oss-120b
+t08,AB,first,A,"Clearer, accurate, and more engaging for general readers",True,groq/openai/gpt-oss-120b
+t08,BA,second,A,"Clear, accurate, well‑structured and engaging for general readers",True,groq/openai/gpt-oss-120b
+t09,AB,second,B,"B offers deeper, more comprehensive coverage while maintaining an engaging tone",True,groq/openai/gpt-oss-120b
+t09,BA,first,B,More comprehensive coverage while staying engaging for general readers,True,groq/openai/gpt-oss-120b
+t10,AB,second,B,"Post B offers a clearer, more systematic structure and deeper, yet accessible, coverage while maintaining an engaging tone for non‑programmers",True,groq/openai/gpt-oss-120b
+t10,BA,first,B,"More comprehensive, better structured, and more engaging for non-programmers",True,groq/openai/gpt-oss-120b
+t11,AB,first,A,"Post A is more engaging, better structured, and provides deeper, audience‑friendly coverage",True,groq/openai/gpt-oss-120b
+t11,BA,first,B,More comprehensive coverage and clearer structure for the target audience,True,groq/openai/gpt-oss-120b
+t12,AB,first,A,Clearer flow and more engaging tone for a general audience while covering key points succinctly,True,groq/openai/gpt-oss-120b
+t12,BA,first,B,"More comprehensive, engaging, and well‑structured for general readers",True,groq/openai/gpt-oss-120b
+t13,AB,second,B,"offers richer, well‑structured content that engages a general audience while maintaining an informative tone",True,groq/openai/gpt-oss-120b
+t13,BA,first,B,"More comprehensive, engaging, and well-structured for the target audience",True,groq/openai/gpt-oss-120b
+t14,AB,second,B,"Post B offers deeper, research‑backed insights while maintaining an engaging, audience‑friendly tone",True,groq/openai/gpt-oss-120b
+t14,BA,first,B,"Post A offers more relevant, engaging, well‑structured, and in‑depth content for general readers",True,groq/openai/gpt-oss-120b
+t15,AB,second,B,"Post B offers clearer structure, deeper coverage, and stays more engaging for general readers",True,groq/openai/gpt-oss-120b
+t15,BA,second,A,Clearer flow and more engaging for general readers,True,groq/openai/gpt-oss-120b
+t16,AB,first,A,"Clearer flow, engaging tone, and well-structured, audience-friendly content",True,groq/openai/gpt-oss-120b
+t16,BA,first,B,"offers deeper, more comprehensive coverage while maintaining an engaging, informative tone",True,groq/openai/gpt-oss-120b
+t17,AB,first,A,"clear, engaging language suited for general readers",True,groq/openai/gpt-oss-120b
+t17,BA,first,B,"More comprehensive, engaging, and well‑structured for general readers",True,groq/openai/gpt-oss-120b
+t18,AB,second,B,"Post B offers richer, more engaging content with stronger structure and depth for a general audience",True,groq/openai/gpt-oss-120b
+t18,BA,first,B,"More comprehensive, better structured, and more engaging for general readers",True,groq/openai/gpt-oss-120b
+t19,AB,second,B,"offers clearer structure, deeper coverage and an engaging tone for general readers",True,groq/openai/gpt-oss-120b
+t19,BA,first,B,"More comprehensive, engaging, and better structured for a general audience",True,groq/openai/gpt-oss-120b
+t20,AB,second,B,"Post B offers clearer structure, richer detail, and more engaging strategies for a general audience",True,groq/openai/gpt-oss-120b
+t20,BA,first,B,"More comprehensive, engaging, and well-structured for general readers",True,groq/openai/gpt-oss-120b
+t21,AB,first,A,"More accurate, engaging, and well‑structured for general readers",True,groq/openai/gpt-oss-120b
+t21,BA,second,A,"Clear, accurate, and well‑structured with an engaging tone for general readers",True,groq/openai/gpt-oss-120b
+t22,AB,second,B,"offers deeper, more comprehensive information with a clearer, engaging structure for the target audience",True,groq/openai/gpt-oss-120b
+t22,BA,first,B,"Post A offers deeper, more engaging, and better‑structured content for general readers",True,groq/openai/gpt-oss-120b
+t23,AB,second,B,offers broader depth and clearer debunking of misconceptions for a general audience,True,groq/openai/gpt-oss-120b
+t23,BA,first,B,"more engaging, thorough, and well‑structured for a general audience",True,groq/openai/gpt-oss-120b
+t24,AB,first,A,Clearer structure and more engaging flow for general readers,True,groq/openai/gpt-oss-120b
+t24,BA,second,A,"Clearer, more concise explanation suited to general readers",True,groq/openai/gpt-oss-120b
+t25,AB,second,B,"Post B offers deeper, more structured information with clear tables and practical details, better serving general readers.",True,groq/openai/gpt-oss-120b
+t25,BA,first,B,"Post A offers richer, more engaging, and better‑structured information for general readers",True,groq/openai/gpt-oss-120b
+t26,AB,second,B,"offers deeper, well‑structured info while staying engaging for non‑experts",True,groq/openai/gpt-oss-120b
+t26,BA,first,B,More comprehensive and engaging while staying audience‑friendly,True,groq/openai/gpt-oss-120b
+t27,AB,second,B,"More engaging, deeper, and better‑structured for a general audience",True,groq/openai/gpt-oss-120b
+t27,BA,first,B,"More engaging, thorough, and well-structured for general readers",True,groq/openai/gpt-oss-120b
+t28,AB,first,A,"Clear evidence, engaging tone, and well‑structured flow for general readers",True,groq/openai/gpt-oss-120b
+t28,BA,first,B,"Post A offers richer, more engaging detail while staying well-structured for a general audience",True,groq/openai/gpt-oss-120b
+t29,AB,first,A,"Clearer flow, accurate content, and engaging tone for general readers",True,groq/openai/gpt-oss-120b
+t29,BA,second,A,"Clearer structure and more accurate, concise explanations for a general audience",True,groq/openai/gpt-oss-120b
+t30,AB,second,B,"more engaging tone, clearer structure, and richer practical depth",True,groq/openai/gpt-oss-120b
+t30,BA,first,B,"Post A provides deeper, more engaging content with a clearer, well‑structured flow",True,groq/openai/gpt-oss-120b

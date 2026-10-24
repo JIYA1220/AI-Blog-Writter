@@ -1,0 +1,18 @@
+{
+  "post_id": "t12_B",
+  "topic_id": "t12",
+  "variant": "B",
+  "topic": "The pros and cons of remote work",
+  "audience": "curious general readers with no specialist background",
+  "tone": "informative and engaging",
+  "section_word_budget": 400,
+  "retrieval": false,
+  "model": "ollama/qwen2.5:3b",
+  "date": "2026-10-23",
+  "words": 2089,
+  "chars": 14636,
+  "sections": 7,
+  "production_ready": true,
+  "pipeline_errors": [],
+  "run_dir": "evaluation\\runs\\generate-20261023-012457"
+}
