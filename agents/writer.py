@@ -9,6 +9,7 @@
 from typing import List
 from langgraph.types import Send
 from utils.llm import get_llm
+from utils.json_utils import message_text
 from utils.logger import log_stage, log_info, log_success, log_warning
 from schemas.models import SectionPlan, WrittenSection, AIBlogWriterState
 
@@ -118,7 +119,7 @@ async def section_writer_node(state: SectionWorkerState) -> dict:
 
     try:
         response = await llm.ainvoke(prompt)
-        content = response.content.strip()
+        content = message_text(response.content).strip()
         word_count = len(content.split())
 
         written = WrittenSection(

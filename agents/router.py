@@ -5,9 +5,9 @@
 # This is a CONDITIONAL EDGE in the LangGraph DAG.
 # ============================================================
 
-import json
 import os
 from utils.llm import get_llm
+from utils.json_utils import parse_llm_json
 from utils.logger import log_stage, log_info
 from schemas.models import AIBlogWriterState
 
@@ -60,20 +60,7 @@ async def router_node(state: AIBlogWriterState) -> dict:
 
     try:
         response = await llm.ainvoke(prompt)
-        raw = response.content.strip()
-
-        # Strip markdown code fences if model adds them
-        if raw.startswith("```"):
-            lines = raw.splitlines()
-            if lines[0].startswith("```"):
-                raw = "\n".join(lines[1:-1])
-        raw = raw.strip()
-
-        # Handle case where model might put 'json' at the start
-        if raw.startswith("json"):
-            raw = raw[4:].strip()
-
-        decision = json.loads(raw)
+        decision = parse_llm_json(response.content)
         needs_retrieval = bool(decision.get("needs_retrieval", False))
         reason = decision.get("reason", "No reason provided")
 

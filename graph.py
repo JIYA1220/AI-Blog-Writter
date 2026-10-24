@@ -11,6 +11,7 @@
 #         → dispatcher  (fans out N parallel writers via Send)
 #           → [section_writer_0, section_writer_1, ...N]  ← PARALLEL
 #         → reducer     (merges all sections deterministically)
+#           → evaluator (LLM-as-judge: score 1-10, pass if >= 7)
 #   END
 # ============================================================
 
